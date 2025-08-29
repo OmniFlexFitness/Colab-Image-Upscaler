@@ -1,0 +1,15 @@
+{
+  "import_path": "images/input",
+  "export_path": "images/output",
+  "export_format": "png",
+  "resolution_mode": "multiplier",
+  "resolution_value": 2,
+  "model_name": "eugenesiow/edsr-base",
+  "other_flags": {
+    "face_enhance": true
+  },
+  "notes": {
+    "resolution_mode": "Use 'multiplier' (e.g., 2, 4) or 'fixed' (e.g., '1920x1080').",
+    "face_enhance": "This flag is not currently supported by the super-image library but is included for future compatibility."
+  }
+}
