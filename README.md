@@ -51,20 +51,43 @@ Before running the upscaler, you can customize its behavior by editing the `conf
 *   `resolution_value`: The value for the chosen mode. For `multiplier`, this is a number (e.g., `2`). For `fixed`, this is a string (e.g., `"1920x1080"`).
 *   `model_name`: The pre-trained model to use from the Hugging Face Hub.
 
+
 ## Usage
 
-The application can be run using the provided scripts. It will prompt you to enter a path to an image or a folder of images.
+The application can be run using the provided scripts or directly from the terminal. It will prompt you to enter a path to an image or a folder of images.
+
+### Run Directly from the Terminal (Recommended)
+
+From the root folder of this repository, run:
+
+```bash
+python src/upscaler.py
+```
+
+This works on all platforms (Windows, macOS, Linux) as long as you have Python and the required dependencies installed.
+
+### Using Provided Scripts
 
 1.  **For Windows:**
-    Double-click `Upscaler.bat` or run it from the command line:
-    ```cmd
-    Upscaler.bat
-    ```
+  Double-click `Upscaler.bat` or run it from the command line:
+  ```cmd
+  Upscaler.bat
+  ```
 
 2.  **For macOS/Linux:**
-    Run the shell script from your terminal:
-    ```bash
-    ./Upscaler.sh
-    ```
+  Run the shell script from your terminal:
+  ```bash
+  ./Upscaler.sh
+  ```
 
 The script will prompt you for the path to your image or folder. You can press Enter to use the default `import_path` from your `config.json`. If the path is invalid, it will ask you to try again. The script can handle single image files or a folder containing multiple images.
+
+## Requirements
+
+Before running the script, make sure you have all required libraries installed. Install dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
+
+It is recommended to use a virtual environment (see Setup and Installation above).
