@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from PIL import Image
 from super_image import EdsrModel, ImageLoader
+from video_processing import process_video
 
 def load_config():
     """Loads the configuration from config.json."""
@@ -13,23 +14,28 @@ def load_config():
     with open(config_path, 'r') as f:
         return json.load(f)
 
-def get_image_paths(input_path):
-    """Gets a list of image file paths from a single file or a directory."""
+def get_media_paths(input_path):
+    """Gets lists of image and video file paths from a single file or a directory."""
     input_path = Path(input_path)
     image_paths = []
-    supported_formats = ['.png', '.jpg', '.jpeg', '.bmp', '.tiff']
+    video_paths = []
+    supported_image_formats = ['.png', '.jpg', '.jpeg', '.bmp', '.tiff']
+    supported_video_formats = ['.mp4', '.mov', '.avi', '.mkv']
 
     if input_path.is_dir():
-        print(f"Processing folder: {input_path}")
+        print(f"Scanning folder: {input_path}")
         for file_path in sorted(input_path.iterdir()):
-            if file_path.suffix.lower() in supported_formats:
+            if file_path.suffix.lower() in supported_image_formats:
                 image_paths.append(file_path)
+            elif file_path.suffix.lower() in supported_video_formats:
+                video_paths.append(file_path)
     elif input_path.is_file():
-        if input_path.suffix.lower() in supported_formats:
-            print(f"Processing single image: {input_path}")
-            image_paths.append(file_path)
+        if input_path.suffix.lower() in supported_image_formats:
+            image_paths.append(input_path)
+        elif input_path.suffix.lower() in supported_video_formats:
+            video_paths.append(input_path)
     
-    return image_paths
+    return image_paths, video_paths
 
 def upscale_image(image_path, model, config):
     """Upscales a single image and saves it."""
@@ -99,7 +105,7 @@ def main():
 
     while True:
         default_import_path = config.get('import_path', 'images/input')
-        user_input = input(f"Enter the path to an image or folder (or type 'exit' to quit) [{default_import_path}]: ")
+        user_input = input(f"Enter the path to a media file or folder (or type 'exit' to quit) [{default_import_path}]: ")
 
         if user_input.lower() in ['exit', 'quit']:
             break
@@ -113,14 +119,29 @@ def main():
             print(f"Error: The path '{user_input}' does not exist. Please try again.")
             continue
 
-        image_paths = get_image_paths(user_input)
+        image_paths, video_paths = get_media_paths(user_input)
 
-        if not image_paths:
-            print(f"No supported image files found at '{user_input}'. Supported formats: .png, .jpg, .jpeg, .bmp, .tiff")
+        if not image_paths and not video_paths:
+            print(f"No supported media files found at '{user_input}'.")
             continue
+        
+        media_type_to_process = "all"
+        if image_paths and video_paths and input_path.is_dir():
+            while True:
+                choice = input("Both images and videos found. What would you like to process? (images/videos/all): ").lower()
+                if choice in ["images", "videos", "all"]:
+                    media_type_to_process = choice
+                    break
+                else:
+                    print("Invalid choice. Please enter 'images', 'videos', or 'all'.")
 
-        for path in image_paths:
-            upscale_image(path, model, config)
+        if media_type_to_process in ["images", "all"]:
+            for path in image_paths:
+                upscale_image(path, model, config)
+
+        if media_type_to_process in ["videos", "all"]:
+            for path in video_paths:
+                process_video(path, config, model)
         
         print("\nProcessing complete for this batch.")
         

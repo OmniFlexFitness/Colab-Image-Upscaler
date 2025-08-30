@@ -3,3 +3,7 @@ Pillow
 requests
 opencv-python-headless
 ipykernel
+ffmpeg-python
+tensorflow==2.20.0
+tensorflow_hub
+mediapy

@@ -8,8 +8,14 @@
   "other_flags": {
     "face_enhance": true
   },
+  "video_settings": {
+    "codec": "h264",
+    "keep_temp_files": false,
+    "frame_rate": 0
+  },
   "notes": {
     "resolution_mode": "Use 'multiplier' (e.g., 2, 4) or 'fixed' (e.g., '1920x1080').",
-    "face_enhance": "This flag is not currently supported by the super-image library but is included for future compatibility."
+    "face_enhance": "This flag is not currently supported by the super-image library but is included for future compatibility.",
+    "video_settings": "Settings for video processing. 'codec' can be 'h264' or 'h265'. 'frame_rate' is the target framerate (0 to use original)."
   }
 }
