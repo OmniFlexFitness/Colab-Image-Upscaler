@@ -1,0 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
+
+:root {
+    --primary-color: #0d0d2b; /* Deep blue */
+    --secondary-color: #1a1a3a;
+    --accent-color-1: #8a2be2; /* Blue-Violet */
+    --accent-color-2: #00ffff; /* Cyan/Aqua */
+    --text-color: #e0e0e0;
+    --text-color-dark: #a0a0a0;
+    --border-glow: 0 0 5px var(--accent-color-2), 0 0 10px var(--accent-color-2), 0 0 15px var(--accent-color-1);
+    --font-primary: 'Orbitron', sans-serif;
+    --font-secondary: 'Roboto', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    font-family: var(--font-secondary);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 2rem;
+    background-image:
+        linear-gradient(rgba(13, 13, 43, 0.95), rgba(13, 13, 43, 0.95)),
+        url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    background-color: var(--secondary-color);
+    border: 1px solid var(--accent-color-1);
+    border-radius: 10px;
+    box-shadow: var(--border-glow);
+    padding: 2rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--accent-color-2);
+    padding-bottom: 1rem;
+}
+
+header h1 {
+    font-family: var(--font-primary);
+    color: var(--accent-color-2);
+    text-shadow: 0 0 5px var(--accent-color-2);
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    color: var(--text-color-dark);
+    font-size: 1rem;
+}
+
+main > div {
+    background: rgba(0,0,0,0.2);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-color-1);
+}
+
+h2 {
+    font-family: var(--font-primary);
+    color: var(--accent-color-2);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--primary-color);
+    border: 1px solid var(--accent-color-1);
+    border-radius: 5px;
+    color: var(--text-color);
+    font-family: var(--font-secondary);
+}
+
+input[type="file"] {
+    display: block;
+    padding: 1rem;
+    border: 2px dashed var(--accent-color-1);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#image-preview {
+    margin-top: 1rem;
+    max-height: 200px;
+    overflow: hidden;
+}
+
+#image-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+button, .button {
+    display: inline-block;
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(45deg, var(--accent-color-1), var(--accent-color-2));
+    color: var(--primary-color);
+    font-family: var(--font-primary);
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+button:hover, .button:hover {
+    box-shadow: var(--border-glow);
+    transform: translateY(-2px);
+}
+
+.result-section {
+    text-align: center;
+}
+
+#loading-indicator {
+    padding: 2rem;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid var(--accent-color-2);
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#result-image-container img {
+    max-width: 100%;
+    border: 2px solid var(--accent-color-2);
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--accent-color-1);
+    color: var(--text-color-dark);
+}

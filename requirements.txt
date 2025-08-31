@@ -3,3 +3,4 @@ Pillow
 requests
 opencv-python-headless
 ipykernel
+Flask
