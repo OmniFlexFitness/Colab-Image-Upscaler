@@ -5,4 +5,4 @@ opencv-python-headless
 ipykernel
 Flask
 celery==5.2.7
-importlib-metadata==4.11.4
+importlib-metadata<5.0

@@ -54,6 +54,11 @@ def upscale_start():
     # Get settings from the form
     form_data = request.form.to_dict()
     output_dir = form_data.get('output_directory') or app.config['OUTPUT_FOLDER']
+
+    # Sanitize the output directory path to remove quotes
+    if output_dir:
+        output_dir = output_dir.strip('\'"')
+
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     tasks = []
