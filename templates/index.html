@@ -45,19 +45,27 @@
                         <label for="model_name">Model:</label>
                         <input type="text" id="model_name" name="model_name" placeholder="e.g., eugenesiow/edsr-base">
                     </div>
+                    <div class="form-group">
+                        <label for="output_directory">Output Directory (optional):</label>
+                        <input type="text" id="output_directory" name="output_directory" placeholder="e.g., /path/to/output">
+                    </div>
                 </form>
             </div>
 
             <div class="action-section">
                 <h2>3. Upscale</h2>
                 <button id="upscale-button">Upscale Image</button>
+                <button id="cancel-button" style="display: none;">Cancel</button>
             </div>
 
             <div class="result-section">
                 <h2>4. Result</h2>
-                <div id="loading-indicator" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Upscaling in progress...</p>
+                <div id="progress-container" style="display: none;">
+                    <p id="progress-text"></p>
+                    <div class="progress-bar-container">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                    <p id="current-file-text"></p>
                 </div>
                 <div id="result-image-container"></div>
                 <a id="download-link" style="display: none;" class="button">Download Image</a>

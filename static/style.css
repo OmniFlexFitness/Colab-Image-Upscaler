@@ -106,19 +106,69 @@ input[type="file"] {
 
 #image-preview {
     margin-top: 1rem;
-    max-height: 200px;
-    overflow: hidden;
+    display: flex; /* Use flexbox for alignment */
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping for multiple images */
+    gap: 15px;
 }
 
-#image-preview img {
+/* Default state for the container */
+.preview-image-container {
+    break-inside: avoid; /* For waterfall layout */
+    text-align: center;
+    width: 100%; /* Default width */
+}
+
+.preview-image-container img {
     max-width: 100%;
     height: auto;
     border-radius: 5px;
+    border: 1px solid var(--accent-color-1);
+}
+
+/* Single image preview style */
+#image-preview.single-image {
+    max-height: 50vh;
+}
+
+#image-preview.single-image .preview-image-container img {
+    max-height: 50vh; /* Respect the container's max-height */
+    width: auto;
+}
+
+/* Multi-image preview container style */
+#image-preview.multi-image {
+    max-height: 60vh;
+    width: 90vw;
+    max-width: 100%;
+    overflow-y: auto;
+    border: 1px solid var(--accent-color-2);
+    padding: 15px;
+    column-count: 4; /* Waterfall effect */
+    column-gap: 15px;
+    align-items: flex-start; /* Align items to the top */
+}
+
+#image-preview.multi-image .preview-image-container {
+    margin-bottom: 15px; /* Spacing between items in columns */
+}
+
+.image-filename {
+    font-size: 0.8em;
+    color: var(--text-color-dark);
+    margin-top: 5px;
+    word-break: break-all;
+}
+
+.action-section {
+    display: flex;
+    gap: 1rem;
 }
 
 button, .button {
     display: inline-block;
-    width: 100%;
+    flex-grow: 1; /* Allow buttons to share space */
     padding: 1rem;
     background: linear-gradient(45deg, var(--accent-color-1), var(--accent-color-2));
     color: var(--primary-color);
@@ -173,4 +223,43 @@ footer {
     padding-top: 1rem;
     border-top: 1px solid var(--accent-color-1);
     color: var(--text-color-dark);
+}
+
+/* Progress Bar Styles */
+#progress-container {
+    margin-bottom: 1.5rem;
+}
+
+.progress-bar-container {
+    width: 100%;
+    background-color: var(--primary-color);
+    border: 1px solid var(--accent-color-1);
+    border-radius: 5px;
+    padding: 2px;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 20px;
+    background: linear-gradient(45deg, var(--accent-color-1), var(--accent-color-2));
+    border-radius: 3px;
+    transition: width 0.3s ease-in-out;
+    box-shadow: var(--border-glow);
+}
+
+#progress-text, #current-file-text {
+    margin: 8px 0;
+    color: var(--text-color);
+    font-family: var(--font-secondary);
+}
+
+/* Cancel Button Style */
+#cancel-button {
+    background: #6c757d; /* A more neutral color for cancel */
+    flex-grow: 0.5; /* Make it smaller than the main button */
+}
+
+#cancel-button:hover {
+    background: #5a6268;
+    box-shadow: 0 0 5px #dc3545, 0 0 10px #dc3545; /* Red glow on hover */
 }
