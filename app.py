@@ -50,52 +50,71 @@ def uploaded_file(filename):
 
 @app.route('/upscale', methods=['POST'])
 def upscale():
-    """Handles image upload and the upscaling process."""
+    """Handles multiple image uploads and the upscaling process."""
     if 'image' not in request.files:
-        return jsonify({'error': 'No image file provided'}), 400
+        return jsonify({'error': 'No image files provided'}), 400
 
-    file = request.files['image']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+    # Get the list of uploaded files
+    files = request.files.getlist('image')
+    
+    if not files or all(file.filename == '' for file in files):
+        return jsonify({'error': 'No selected files'}), 400
 
-    if file:
-        filename = secure_filename(file.filename)
-        upload_path = Path(app.config['UPLOAD_FOLDER']) / filename
-        file.save(upload_path)
+    results = []
+    for file in files:
+        if file and file.filename != '':
+            filename = secure_filename(file.filename)
+            upload_path = Path(app.config['UPLOAD_FOLDER']) / filename
+            file.save(upload_path)
 
-        try:
-            # Get settings from the form
-            scale = int(request.form.get('resolution_value', 2))
-            model_name = request.form.get('model_name', config.get('model_name'))
+            try:
+                # Get settings from the form
+                scale = int(request.form.get('resolution_value', 2))
+                model_name = request.form.get('model_name', config.get('model_name'))
 
-            # Prepare a temporary config for the upscaler function
-            upscale_config = {
-                'export_path': app.config['OUTPUT_FOLDER'],
-                'export_format': request.form.get('export_format', 'png'),
-                'resolution_mode': request.form.get('resolution_mode', 'multiplier'),
-                'resolution_value': scale
-            }
+                # Prepare a temporary config for the upscaler function
+                upscale_config = {
+                    'export_path': app.config['OUTPUT_FOLDER'],
+                    'export_format': request.form.get('export_format', 'png'),
+                    'resolution_mode': request.form.get('resolution_mode', 'multiplier'),
+                    'resolution_value': scale
+                }
 
-            # Get the model
-            model = get_model(model_name, scale)
-            if not model:
-                return jsonify({'error': 'Failed to load the specified model.'}), 500
+                # Get the model
+                model = get_model(model_name, scale)
+                if not model:
+                    results.append({
+                        'original': filename,
+                        'error': 'Failed to load the specified model.'
+                    })
+                    continue
 
-            # Run the upscaler
-            output_path = upscale_image_processor(upload_path, model, upscale_config)
+                # Run the upscaler
+                output_path = upscale_image_processor(upload_path, model, upscale_config)
 
-            if output_path:
-                # The path returned is a Path object, convert to string for URL
-                output_filename = os.path.basename(output_path)
-                return jsonify({'output_path': f'/outputs/{output_filename}'})
-            else:
-                return jsonify({'error': 'Failed to upscale image.'}), 500
+                if output_path:
+                    # The path returned is a Path object, convert to string for URL
+                    output_filename = os.path.basename(output_path)
+                    results.append({
+                        'original': filename,
+                        'output_path': f'/outputs/{output_filename}'
+                    })
+                else:
+                    results.append({
+                        'original': filename,
+                        'error': 'Failed to upscale image.'
+                    })
 
-        except Exception as e:
-            print(f"An error occurred during upscaling: {e}")
-            return jsonify({'error': str(e)}), 500
+            except Exception as e:
+                print(f"An error occurred during upscaling {filename}: {e}")
+                results.append({
+                    'original': filename,
+                    'error': str(e)
+                })
 
-    return jsonify({'error': 'An unknown error occurred.'}), 500
+    if not results:
+        return jsonify({'error': 'No files were processed successfully.'}), 500
 
+    return jsonify({'results': results})
 if __name__ == '__main__':
     app.run(debug=True)
