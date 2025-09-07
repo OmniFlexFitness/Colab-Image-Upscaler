@@ -2,7 +2,4 @@ super-image
 Pillow
 requests
 opencv-python-headless
-ipykernel
 Flask
-celery==5.2.7
-importlib-metadata<5.0

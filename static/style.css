@@ -162,13 +162,12 @@ input[type="file"] {
 }
 
 .action-section {
-    display: flex;
-    gap: 1rem;
+    /* Reverted to default block behavior */
 }
 
 button, .button {
     display: inline-block;
-    flex-grow: 1; /* Allow buttons to share space */
+    width: 100%;
     padding: 1rem;
     background: linear-gradient(45deg, var(--accent-color-1), var(--accent-color-2));
     color: var(--primary-color);
@@ -225,41 +224,47 @@ footer {
     color: var(--text-color-dark);
 }
 
-/* Progress Bar Styles */
-#progress-container {
-    margin-bottom: 1.5rem;
-}
-
-.progress-bar-container {
-    width: 100%;
-    background-color: var(--primary-color);
+/* Styles for result items */
+.result-item {
+    margin-bottom: 20px;
+    padding: 15px;
     border: 1px solid var(--accent-color-1);
-    border-radius: 5px;
-    padding: 2px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+    text-align: left;
 }
 
-.progress-bar {
-    width: 0%;
-    height: 20px;
+.result-item h4 {
+    margin-top: 0;
+    color: var(--accent-color-2);
+}
+
+.result-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-top: 10px;
+    border: 1px solid var(--accent-color-2);
+}
+
+.download-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 15px;
     background: linear-gradient(45deg, var(--accent-color-1), var(--accent-color-2));
-    border-radius: 3px;
-    transition: width 0.3s ease-in-out;
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: var(--font-primary);
+}
+
+.download-button:hover {
     box-shadow: var(--border-glow);
+    transform: translateY(-2px);
 }
 
-#progress-text, #current-file-text {
-    margin: 8px 0;
-    color: var(--text-color);
-    font-family: var(--font-secondary);
-}
-
-/* Cancel Button Style */
-#cancel-button {
-    background: #6c757d; /* A more neutral color for cancel */
-    flex-grow: 0.5; /* Make it smaller than the main button */
-}
-
-#cancel-button:hover {
-    background: #5a6268;
-    box-shadow: 0 0 5px #dc3545, 0 0 10px #dc3545; /* Red glow on hover */
+.error-message {
+    color: #ff4d4d;
+    font-weight: bold;
 }
