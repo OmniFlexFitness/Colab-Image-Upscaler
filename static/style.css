@@ -106,14 +106,63 @@ input[type="file"] {
 
 #image-preview {
     margin-top: 1rem;
-    max-height: 200px;
-    overflow: hidden;
+    display: flex; /* Use flexbox for alignment */
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping for multiple images */
+    gap: 15px;
 }
 
-#image-preview img {
+/* Default state for the container */
+.preview-image-container {
+    break-inside: avoid; /* For waterfall layout */
+    text-align: center;
+    width: 100%; /* Default width */
+}
+
+.preview-image-container img {
     max-width: 100%;
     height: auto;
     border-radius: 5px;
+    border: 1px solid var(--accent-color-1);
+}
+
+/* Single image preview style */
+#image-preview.single-image {
+    max-height: 50vh;
+}
+
+#image-preview.single-image .preview-image-container img {
+    max-height: 50vh; /* Respect the container's max-height */
+    width: auto;
+}
+
+/* Multi-image preview container style */
+#image-preview.multi-image {
+    max-height: 60vh;
+    width: 90vw;
+    max-width: 100%;
+    overflow-y: auto;
+    border: 1px solid var(--accent-color-2);
+    padding: 15px;
+    column-count: 4; /* Waterfall effect */
+    column-gap: 15px;
+    align-items: flex-start; /* Align items to the top */
+}
+
+#image-preview.multi-image .preview-image-container {
+    margin-bottom: 15px; /* Spacing between items in columns */
+}
+
+.image-filename {
+    font-size: 0.8em;
+    color: var(--text-color-dark);
+    margin-top: 5px;
+    word-break: break-all;
+}
+
+.action-section {
+    /* Reverted to default block behavior */
 }
 
 button, .button {
@@ -173,4 +222,49 @@ footer {
     padding-top: 1rem;
     border-top: 1px solid var(--accent-color-1);
     color: var(--text-color-dark);
+}
+
+/* Styles for result items */
+.result-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--accent-color-1);
+    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+    text-align: left;
+}
+
+.result-item h4 {
+    margin-top: 0;
+    color: var(--accent-color-2);
+}
+
+.result-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-top: 10px;
+    border: 1px solid var(--accent-color-2);
+}
+
+.download-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 15px;
+    background: linear-gradient(45deg, var(--accent-color-1), var(--accent-color-2));
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: var(--font-primary);
+}
+
+.download-button:hover {
+    box-shadow: var(--border-glow);
+    transform: translateY(-2px);
+}
+
+.error-message {
+    color: #ff4d4d;
+    font-weight: bold;
 }

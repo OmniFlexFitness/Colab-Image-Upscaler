@@ -41,21 +41,26 @@ def upscale_image(image_path: Path, model, config: dict) -> Path:
     export_path = Path(config.get('export_path', 'images/output'))
     export_format = config.get('export_format', 'png')
     export_path.mkdir(parents=True, exist_ok=True)
-
-    mode = config.get('resolution_mode', 'multiplier')
-    value = config.get('resolution_value')
     
     # Create a unique filename to avoid conflicts
     base_filename = image_path.stem
+    mode = config.get('resolution_mode', 'multiplier')
+    value = config.get('resolution_value')
+
+    suffix = ""
+    if mode == 'multiplier':
+        suffix = f"{value}x"
+    elif mode == 'fixed':
+        suffix = str(value)
+
     counter = 0
-    output_filename = f"{base_filename}_{value}x.{export_format}"
+    output_filename = f"{base_filename}_upscaled_{suffix}.{export_format}"
     output_path = export_path / output_filename
 
     while output_path.exists():
         counter += 1
-        output_filename = f"{base_filename}_{value}x_{counter}.{export_format}"
+        output_filename = f"{base_filename}_upscaled_{suffix}_{counter}.{export_format}"
         output_path = export_path / output_filename
-
 
     if mode == 'fixed' and value:
         try:
