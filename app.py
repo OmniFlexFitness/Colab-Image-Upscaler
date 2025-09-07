@@ -46,7 +46,8 @@ def get_config():
 @app.route('/outputs/<filename>')
 def uploaded_file(filename):
     """Serves upscaled images from the output directory."""
-    return send_from_directory(app.config['OUTPUT_FOLDER'], filename)
+    output_dir = request.args.get('output_dir', app.config['OUTPUT_FOLDER'])
+    return send_from_directory(output_dir, filename)
 
 @app.route('/upscale', methods=['POST'])
 def upscale():
@@ -54,13 +55,19 @@ def upscale():
     if 'image' not in request.files:
         return jsonify({'error': 'No image files provided'}), 400
 
-    # Get the list of uploaded files
     files = request.files.getlist('image')
-    
     if not files or all(file.filename == '' for file in files):
         return jsonify({'error': 'No selected files'}), 400
 
     results = []
+    form_data = request.form.to_dict()
+    output_dir = form_data.get('output_directory') or app.config['OUTPUT_FOLDER']
+
+    if output_dir:
+        output_dir = output_dir.strip('\'"')
+
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+
     for file in files:
         if file and file.filename != '':
             filename = secure_filename(file.filename)
@@ -68,53 +75,42 @@ def upscale():
             file.save(upload_path)
 
             try:
-                # Get settings from the form
-                scale = int(request.form.get('resolution_value', 2))
-                model_name = request.form.get('model_name', config.get('model_name'))
+                # This is a bit of a hack to handle the fact that the form value is a string
+                try:
+                    scale = int(form_data.get('resolution_value'))
+                except (ValueError, TypeError):
+                    scale = 2 # default
 
-                # Prepare a temporary config for the upscaler function
+                model_name = form_data.get('model_name', config.get('model_name'))
+
                 upscale_config = {
-                    'export_path': app.config['OUTPUT_FOLDER'],
-                    'export_format': request.form.get('export_format', 'png'),
-                    'resolution_mode': request.form.get('resolution_mode', 'multiplier'),
-                    'resolution_value': scale
+                    'export_path': output_dir,
+                    'export_format': form_data.get('export_format', 'png'),
+                    'resolution_mode': form_data.get('resolution_mode', 'multiplier'),
+                    'resolution_value': form_data.get('resolution_value')
                 }
 
-                # Get the model
                 model = get_model(model_name, scale)
                 if not model:
-                    results.append({
-                        'original': filename,
-                        'error': 'Failed to load the specified model.'
-                    })
+                    results.append({'original': filename, 'error': 'Failed to load the specified model.'})
                     continue
 
-                # Run the upscaler
                 output_path = upscale_image_processor(upload_path, model, upscale_config)
 
                 if output_path:
-                    # The path returned is a Path object, convert to string for URL
                     output_filename = os.path.basename(output_path)
-                    results.append({
-                        'original': filename,
-                        'output_path': f'/outputs/{output_filename}'
-                    })
+                    results.append({'original': filename, 'output_path': f'/outputs/{output_filename}', 'output_dir': output_dir})
                 else:
-                    results.append({
-                        'original': filename,
-                        'error': 'Failed to upscale image.'
-                    })
+                    results.append({'original': filename, 'error': 'Failed to upscale image.'})
 
             except Exception as e:
                 print(f"An error occurred during upscaling {filename}: {e}")
-                results.append({
-                    'original': filename,
-                    'error': str(e)
-                })
+                results.append({'original': filename, 'error': str(e)})
 
     if not results:
         return jsonify({'error': 'No files were processed successfully.'}), 500
 
     return jsonify({'results': results})
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8084, debug=True)

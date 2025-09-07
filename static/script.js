@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const upscaleButton = document.getElementById('upscale-button');
     const loadingIndicator = document.getElementById('loading-indicator');
     const resultImageContainer = document.getElementById('result-image-container');
-    const downloadLink = document.getElementById('download-link');
+    const outputDirectoryInput = document.getElementById('output_directory');
 
     // Fetch and apply initial config
     fetch('/config')
@@ -15,12 +15,21 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('resolution_mode').value = config.resolution_mode || 'multiplier';
             document.getElementById('resolution_value').value = config.resolution_value || 2;
             document.getElementById('model_name').value = config.model_name || 'eugenesiow/edsr-base';
+            outputDirectoryInput.placeholder = `Default: ${config.export_path || 'images/output'}`;
         })
         .catch(error => console.error('Error fetching config:', error));
 
-    // Multiple images preview
+    // Updated image preview logic
     imageUpload.addEventListener('change', () => {
         imagePreview.innerHTML = '';
+        imagePreview.classList.remove('single-image', 'multi-image');
+
+        if (imageUpload.files.length === 1) {
+            imagePreview.classList.add('single-image');
+        } else if (imageUpload.files.length > 1) {
+            imagePreview.classList.add('multi-image');
+        }
+
         if (imageUpload.files.length > 0) {
             for (const file of imageUpload.files) {
                 const reader = new FileReader();
@@ -45,62 +54,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loadingIndicator.style.display = 'block';
         resultImageContainer.innerHTML = '';
-        downloadLink.style.display = 'none';
 
-        const formData = new FormData();
-        
-        // Append all selected files to the form data
+        const formData = new FormData(settingsForm);
         for (const file of imageUpload.files) {
             formData.append('image', file);
         }
 
-        // Append form settings
-        const settings = new FormData(settingsForm);
-        for (const [key, value] of settings.entries()) {
-            formData.append(key, value);
-        }
         fetch('/upscale', {
             method: 'POST',
             body: formData
         })
         .then(response => {
             if (!response.ok) {
-                return response.json().then(err => { throw new Error(err.error) });
+                return response.json().then(err => { throw new Error(err.error || 'An unknown error occurred.') });
             }
             return response.json();
         })
         .then(data => {
             loadingIndicator.style.display = 'none';
             if (data.results) {
-                // Display all results
-                resultImageContainer.innerHTML = '<h3>Upscaled Images:</h3>';
-                
-                data.results.forEach(result => {
-                    if (result.output_path) {
-                        const imageUrl = `${result.output_path}?t=${new Date().getTime()}`;
-                        const resultDiv = document.createElement('div');
-                        resultDiv.className = 'result-item';
-                        resultDiv.innerHTML = `
-                            <h4>${result.original}</h4>
-                            <div class="result-image">
-                                <img src="${imageUrl}" alt="Upscaled ${result.original}">
-                            </div>
-                            <a href="${imageUrl}" download="${result.output_path.split('/').pop()}" class="download-button">Download</a>
-                        `;
-                        resultImageContainer.appendChild(resultDiv);
-                    } else if (result.error) {
-                        const resultDiv = document.createElement('div');
-                        resultDiv.className = 'result-item error';
-                        resultDiv.innerHTML = `
-                            <h4>${result.original}</h4>
-                            <p class="error-message">Error: ${result.error}</p>
-                        `;
-                        resultImageContainer.appendChild(resultDiv);
-                    }
-                });
-                
-                // Hide the single download link as we now have multiple download buttons
-                downloadLink.style.display = 'none';
+                displayResults(data.results);
             } else {
                 throw new Error(data.error || 'An unknown error occurred.');
             }
@@ -111,4 +84,32 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Upscale error:', error);
         });
     });
+
+    function displayResults(results) {
+        resultImageContainer.innerHTML = '<h3>Upscaled Images:</h3>';
+
+        results.forEach(result => {
+            const resultDiv = document.createElement('div');
+            if (result.output_path) {
+                const filename = result.output_path.split(/[\\/]/).pop();
+                const imageUrl = `${result.output_path}?output_dir=${encodeURIComponent(result.output_dir)}&t=${new Date().getTime()}`;
+
+                resultDiv.className = 'result-item';
+                resultDiv.innerHTML = `
+                    <h4>${result.original}</h4>
+                    <div class="result-image">
+                        <img src="${imageUrl}" alt="Upscaled ${result.original}">
+                    </div>
+                    <a href="${imageUrl}" download="${filename}" class="download-button button">Download</a>
+                `;
+            } else {
+                resultDiv.className = 'result-item error';
+                resultDiv.innerHTML = `
+                    <h4>${result.original}</h4>
+                    <p class="error-message">Error: ${result.error}</p>
+                `;
+            }
+            resultImageContainer.appendChild(resultDiv);
+        });
+    }
 });
