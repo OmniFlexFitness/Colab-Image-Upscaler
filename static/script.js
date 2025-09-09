@@ -1,13 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Mode selection
+    const imageModeRadio = document.querySelector('input[name="mode"][value="image"]');
+    const videoModeRadio = document.querySelector('input[name="mode"][value="video"]');
+    const imageModeSection = document.getElementById('image-mode-section');
+    const videoModeSection = document.getElementById('video-mode-section');
+    const videoSettings = document.getElementById('video-settings');
+
+    // General elements
     const settingsForm = document.getElementById('settings-form');
-    const imageUpload = document.getElementById('image-upload');
-    const imagePreview = document.getElementById('image-preview');
-    const upscaleButton = document.getElementById('upscale-button');
     const loadingIndicator = document.getElementById('loading-indicator');
     const resultImageContainer = document.getElementById('result-image-container');
     const outputDirectoryInput = document.getElementById('output_directory');
+    const actionButton = document.getElementById('action-button');
+    const actionTitle = document.getElementById('action-title');
 
-    // Fetch and apply initial config
+    // Image-specific elements
+    const imageUpload = document.getElementById('image-upload');
+    const imagePreview = document.getElementById('image-preview');
+
+    // Video-specific elements
+    const videoUpload = document.getElementById('video-upload');
+    const videoPreview = document.getElementById('video-preview');
+    const upscaleFramesCheckbox = document.getElementById('upscale_frames');
+
+    // --- Initial Setup ---
     fetch('/config')
         .then(response => response.json())
         .then(config => {
@@ -19,7 +35,37 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Error fetching config:', error));
 
-    // Updated image preview logic
+    // --- Mode Switching Logic ---
+    function updateMode() {
+        if (imageModeRadio.checked) {
+            imageModeSection.style.display = 'block';
+            videoModeSection.style.display = 'none';
+            videoSettings.style.display = 'none';
+            actionTitle.textContent = '3. Upscale';
+            actionButton.textContent = 'Upscale Image(s)';
+            clearPreviews();
+        } else {
+            imageModeSection.style.display = 'none';
+            videoModeSection.style.display = 'block';
+            videoSettings.style.display = 'block';
+            actionTitle.textContent = '3. Process Video';
+            actionButton.textContent = 'Extract Frames';
+            clearPreviews();
+        }
+    }
+
+    imageModeRadio.addEventListener('change', updateMode);
+    videoModeRadio.addEventListener('change', updateMode);
+    updateMode(); // Set initial mode
+
+    // --- Preview Logic ---
+    function clearPreviews() {
+        imagePreview.innerHTML = '';
+        videoPreview.innerHTML = '';
+        imageUpload.value = '';
+        videoUpload.value = '';
+    }
+
     imageUpload.addEventListener('change', () => {
         imagePreview.innerHTML = '';
         imagePreview.classList.remove('single-image', 'multi-image');
@@ -45,8 +91,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Upscale button click
-    upscaleButton.addEventListener('click', () => {
+    videoUpload.addEventListener('change', () => {
+        videoPreview.innerHTML = '';
+        if (videoUpload.files.length > 0) {
+            const file = videoUpload.files[0];
+            const videoElement = document.createElement('video');
+            videoElement.src = URL.createObjectURL(file);
+            videoElement.controls = true;
+            videoElement.style.maxWidth = '100%';
+            videoPreview.appendChild(videoElement);
+        }
+    });
+
+    // --- Action Button Logic ---
+    actionButton.addEventListener('click', () => {
+        if (imageModeRadio.checked) {
+            handleImageUpscale();
+        } else {
+            handleVideoExtract();
+        }
+    });
+
+    function handleImageUpscale() {
         if (imageUpload.files.length === 0) {
             alert('Please select at least one image first.');
             return;
@@ -73,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             loadingIndicator.style.display = 'none';
             if (data.results) {
-                displayResults(data.results);
+                displayImageResults(data.results);
             } else {
                 throw new Error(data.error || 'An unknown error occurred.');
             }
@@ -83,11 +149,46 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Error: ${error.message}`);
             console.error('Upscale error:', error);
         });
-    });
+    }
 
-    function displayResults(results) {
+    function handleVideoExtract() {
+        if (videoUpload.files.length === 0) {
+            alert('Please select a video file first.');
+            return;
+        }
+
+        loadingIndicator.style.display = 'block';
+        resultImageContainer.innerHTML = '';
+
+        const formData = new FormData(settingsForm);
+        formData.append('video', videoUpload.files[0]);
+        formData.set('upscale_frames', upscaleFramesCheckbox.checked);
+
+
+        fetch('/extract', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error || 'An unknown error occurred.') });
+            }
+            return response.json();
+        })
+        .then(data => {
+            loadingIndicator.style.display = 'none';
+            displayVideoResults(data);
+        })
+        .catch(error => {
+            loadingIndicator.style.display = 'none';
+            alert(`Error: ${error.message}`);
+            console.error('Extraction error:', error);
+        });
+    }
+
+    // --- Result Display Logic ---
+    function displayImageResults(results) {
         resultImageContainer.innerHTML = '<h3>Upscaled Images:</h3>';
-
         results.forEach(result => {
             const resultDiv = document.createElement('div');
             if (result.output_path) {
@@ -111,5 +212,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             resultImageContainer.appendChild(resultDiv);
         });
+    }
+
+    function displayVideoResults(data) {
+        resultImageContainer.innerHTML = `<h3>Extraction Complete</h3>
+                                          <p>${data.extracted_count} frames were extracted.</p>`;
+        if (data.upscaled_results && data.upscaled_results.length > 0) {
+            resultImageContainer.innerHTML += '<h3>Upscaled Frames:</h3>';
+            displayImageResults(data.upscaled_results); // Reuse the same display logic
+        }
     }
 });

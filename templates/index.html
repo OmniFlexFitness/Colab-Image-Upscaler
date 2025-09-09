@@ -14,12 +14,27 @@
         </header>
 
         <main>
-            <div class="upload-section">
-                <h2>1. Upload Image</h2>
-                <!-- Change this line (around line 19): -->
-                <input type="file" id="image-upload" accept="image/*" multiple>
-                <div id="image-preview"></div>
+            <div class="mode-selector">
+                <label><input type="radio" name="mode" value="image" checked> Image Processing</label>
+                <label><input type="radio" name="mode" value="video"> Video Processing</label>
             </div>
+
+            <div id="image-mode-section">
+                <div class="upload-section">
+                    <h2>1. Upload Image(s)</h2>
+                    <input type="file" id="image-upload" accept="image/*" multiple>
+                    <div id="image-preview"></div>
+                </div>
+            </div>
+
+            <div id="video-mode-section" style="display: none;">
+                <div class="upload-section">
+                    <h2>1. Upload Video</h2>
+                    <input type="file" id="video-upload" accept="video/*">
+                    <div id="video-preview"></div>
+                </div>
+            </div>
+
             <div class="settings-section">
                 <h2>2. Configure Settings</h2>
                 <form id="settings-form">
@@ -49,12 +64,20 @@
                         <label for="output_directory">Output Directory (optional):</label>
                         <input type="text" id="output_directory" name="output_directory" placeholder="e.g., /path/to/output">
                     </div>
+                    <div id="video-settings">
+                        <div class="form-group">
+                            <label for="upscale_frames">
+                                <input type="checkbox" id="upscale_frames" name="upscale_frames">
+                                Upscale frames after extraction
+                            </label>
+                        </div>
+                    </div>
                 </form>
             </div>
 
             <div class="action-section">
-                <h2>3. Upscale</h2>
-                <button id="upscale-button">Upscale Image</button>
+                <h2 id="action-title">3. Process</h2>
+                <button id="action-button">Upscale Image(s)</button>
             </div>
 
             <div class="result-section">
