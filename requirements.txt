@@ -10,3 +10,14 @@ transformers
 diffusers
 realesrgan
 timm
+Flask
+Pillow
+requests
+super-image
+torch
+torchvision
+transformers
+diffusers
+realesrgan
+timm
+opencv-python
