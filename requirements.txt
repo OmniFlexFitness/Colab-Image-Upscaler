@@ -3,3 +3,10 @@ Pillow
 requests
 opencv-python-headless
 Flask
+torch
+torchvision
+torchaudio
+transformers
+diffusers
+realesrgan
+timm

@@ -10,10 +10,19 @@ export UPSCALER_ENV_LOADED=1
 # Resolve project root (directory containing this script)
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Flag to track if pip install occurred
+PIP_INSTALL_DONE=0
 # Activate virtualenv if present
 if [ -d "${PROJECT_ROOT}/venv" ]; then
   # shellcheck source=/dev/null
   source "${PROJECT_ROOT}/venv/bin/activate"
+  
+  # Install requirements if requirements.txt exists
+  if [ -f "${PROJECT_ROOT}/requirements.txt" ]; then
+    echo "[upscaler] Installing requirements from requirements.txt..."
+    pip install -r "${PROJECT_ROOT}/requirements.txt"
+    PIP_INSTALL_DONE=1
+  fi
 else
   echo "[upscaler] No venv found. Create one with:"
   echo "          python -m venv venv && source venv/bin/activate && pip install -r requirements.txt"
@@ -47,4 +56,7 @@ echo "=========================================="
 echo "OmniFlex Upscaler Environment Loaded"
 echo "Aliases: upscaler | upscaler-web"
 echo "Helper:  upscaler-env-info"
+if [ $PIP_INSTALL_DONE -eq 1 ]; then
+  echo "Package requirements successfully installed"
+fi
 echo "=========================================="
